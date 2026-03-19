@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora BPC/LOAS — Avaliação Biopsicossocial</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--s2:#222636;--s3:#2a2f45;
+  --border:#323750;--bl:#3d4460;
+  --accent:#5b8df6;--ag:rgba(91,141,246,.15);
+  --green:#3ecf8e;--red:#f97066;--yellow:#f5c518;--orange:#fb923c;--purple:#a78bfa;
+  --gold:#c9a84c;--gold-light:#e2c97e;
+  --text:#e2e8f7;--muted:#8892b0;--dim:#4a5270;
+  --N:#8892b0;--L:#60a5fa;--M:#f5c518;--G:#fb923c;--C:#f97066;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;}
+
+header{background:linear-gradient(135deg,#0a0c12 0%,#131620 100%);border-bottom:1px solid rgba(201,168,76,.25);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300;backdrop-filter:blur(12px);}
+.logo-area{display:flex;align-items:center;gap:14px;}
+.logo-img{height:38px;object-fit:contain;filter:brightness(1.05);}
+.logo-divider{width:1px;height:30px;background:rgba(201,168,76,.3);}
+.logo-text h1{font-family:'DM Serif Display',serif;font-size:15px;letter-spacing:-.3px;color:var(--text);}
+.logo-text p{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.hbadge{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:5px;padding:3px 8px;font-size:10px;color:var(--gold-light);font-family:'DM Mono',monospace;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--s2);color:var(--muted);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;}
+.btn:hover{border-color:var(--bl);color:var(--text);}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn-primary:hover{opacity:.9;}
+.btn-gold{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.35);color:var(--gold-light);}
+.btn-gold:hover{background:rgba(201,168,76,.22);border-color:var(--gold);color:#f0d898;}
+
+.wrap{max-width:1340px;margin:0 auto;padding:24px 18px;display:grid;grid-template-columns:1fr 320px;gap:18px;}
+@media(max-width:900px){.wrap{grid-template-columns:1fr;}.sticky-col{position:static!important;}header{padding:12px 14px;}.wrap{padding:14px;}}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:16px;}
+.card:last-child{margin-bottom:0;}
+.card-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.card-title{font-family:'DM Serif Display',serif;font-size:15px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.card-body{padding:16px 20px;}
+.tag{font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:500;letter-spacing:.4px;}
+.tag-s{background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.25);}
+.tag-m{background:rgba(62,207,142,.12);color:#3ecf8e;border:1px solid rgba(62,207,142,.25);}
+.tag-x{background:rgba(245,197,24,.12);color:#f5c518;border:1px solid rgba(245,197,24,.25);}
+.tag-r{background:rgba(91,141,246,.12);color:#5b8df6;border:1px solid rgba(91,141,246,.25);}
+
+/* PDF IMPORT */
+.pdf-card{background:linear-gradient(135deg,rgba(201,168,76,.05),rgba(91,141,246,.05));border:1px solid rgba(201,168,76,.2);border-radius:13px;padding:16px 20px;margin-bottom:16px;}
+.pdf-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.pdf-title{font-family:'DM Serif Display',serif;font-size:14px;color:var(--gold-light);display:flex;align-items:center;gap:8px;}
+.pdf-drop-zone{border:2px dashed rgba(201,168,76,.3);border-radius:9px;padding:18px 14px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(201,168,76,.02);position:relative;}
+.pdf-drop-zone:hover,.pdf-drop-zone.dragging{border-color:var(--gold);background:rgba(201,168,76,.07);}
+.pdf-drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.pdf-icon{font-size:26px;margin-bottom:5px;}
+.pdf-hint{font-size:11px;color:var(--muted);}
+.pdf-hint b{color:var(--gold-light);}
+.pdf-status{padding:7px 11px;border-radius:7px;font-size:11px;font-family:'DM Mono',monospace;display:none;line-height:1.5;}
+.pdf-status.loading{display:flex;align-items:center;gap:8px;background:rgba(91,141,246,.1);border:1px solid rgba(91,141,246,.25);color:#7ca8f8;}
+.pdf-status.ok{display:block;background:rgba(62,207,142,.08);border:1px solid rgba(62,207,142,.25);color:var(--green);}
+.pdf-status.err{display:block;background:rgba(249,112,102,.08);border:1px solid rgba(249,112,102,.25);color:var(--red);}
+.spin{display:inline-block;animation:spin 1s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.pdf-bar{height:2px;background:var(--border);border-radius:1px;margin-top:8px;display:none;}
+.pdf-bar.on{display:block;}
+.pdf-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));width:0%;transition:width .4s;border-radius:1px;}
+
+.top-bar{background:var(--s2);border:1px solid var(--border);border-radius:11px;padding:12px 16px;margin-bottom:14px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+.age-tabs{display:flex;gap:5px;}
+.atab{padding:4px 11px;border-radius:6px;border:1px solid var(--border);background:var(--s3);color:var(--muted);font-size:11px;cursor:pointer;transition:all .15s;font-family:'DM Mono',monospace;}
+.atab.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+.vdiv{width:1px;height:26px;background:var(--border);}
+.trow{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--s3);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:background .15s;}
+.trow:hover{background:var(--border);}
+.trow:last-child{margin-bottom:0;}
+.tlabel{flex:1;}
+.tlabel b{color:var(--text);display:block;font-size:12px;font-weight:500;}
+.tlabel small{font-size:11px;color:var(--dim);}
+.tsw{width:32px;height:17px;background:var(--s3);border:1px solid var(--bl);border-radius:9px;position:relative;transition:background .2s;flex-shrink:0;}
+.tsw::after{content:'';position:absolute;left:2px;top:2px;width:11px;height:11px;border-radius:50%;background:var(--muted);transition:all .2s;}
+.tsw.on{background:var(--accent);border-color:var(--accent);}
+.tsw.on::after{left:17px;background:#fff;}
+
+.legend{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:13px;align-items:center;}
+.li{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;}
+.ldot{width:6px;height:6px;border-radius:50%;}
+
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:640px){.dgrid{grid-template-columns:1fr;}}
+.dblock{background:var(--s2);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s;}
+.dblock:hover{border-color:var(--bl);}
+.dblock.full{grid-column:1/-1;}
+.dblock.ai-hi{border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.03);}
+
+.dhead{display:flex;align-items:stretch;}
+.dname-btn{flex:1;padding:10px 12px;cursor:pointer;background:none;border:none;text-align:left;color:inherit;transition:background .15s;min-width:0;}
+.dname-btn:hover{background:rgba(255,255,255,.04);}
+.dcode{font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.6px;margin-bottom:1px;}
+.dname{font-size:12px;font-weight:500;color:var(--text);line-height:1.3;display:flex;align-items:center;gap:5px;}
+.chev{font-size:10px;color:var(--dim);transition:transform .25s;flex-shrink:0;}
+.chev.open{transform:rotate(180deg);}
+.dbadge-col{display:flex;align-items:center;justify-content:center;padding:0 10px;border-left:1px solid var(--border);min-width:48px;flex-shrink:0;}
+.dprev{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:14px;font-weight:700;background:var(--s3);color:var(--dim);border:1.5px dashed var(--border);transition:all .2s;pointer-events:none;}
+
+.qrow{display:flex;gap:4px;padding:0 10px 10px;}
+.qbtn{flex:1;padding:6px 2px;border:1px solid var(--border);border-radius:6px;background:var(--s3);color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;text-align:center;}
+.qbtn:hover{border-color:var(--bl);color:var(--text);}
+.qbtn.aN{background:rgba(136,146,176,.18);border-color:var(--N);color:var(--N);}
+.qbtn.aL{background:rgba(96,165,250,.15);border-color:var(--L);color:var(--L);}
+.qbtn.aM{background:rgba(245,197,24,.15);border-color:var(--M);color:var(--M);}
+.qbtn.aG{background:rgba(251,146,60,.15);border-color:var(--G);color:var(--G);}
+.qbtn.aC{background:rgba(249,112,102,.15);border-color:var(--C);color:var(--C);}
+
+.qpanel{max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(.4,0,.2,1);}
+.qpanel.open{max-height:1200px;border-top:1px solid var(--border);}
+.qinner{padding:12px;}
+.qptitle{font-size:9px;font-family:'DM Mono',monospace;color:var(--dim);letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+
+.qitem{display:flex;align-items:flex-start;gap:0;padding:8px 9px;border-radius:7px;border:1px solid transparent;margin-bottom:5px;transition:background .12s,border-color .12s;}
+.qitem:last-child{margin-bottom:0;}
+.qitem:hover{background:rgba(91,141,246,.04);border-color:rgba(91,141,246,.12);}
+.qitem.ai-hi{background:rgba(201,168,76,.05);border-color:rgba(201,168,76,.18);}
+.qitem-left{flex:1;min-width:0;padding-right:10px;}
+.qitem-header{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.qnum{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);flex-shrink:0;}
+.qcif{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);background:var(--ag);padding:1px 5px;border-radius:3px;flex-shrink:0;}
+.qtext{font-size:11px;color:var(--muted);line-height:1.5;}
+.qitem-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+.mini-row{display:flex;gap:3px;}
+.mbtn{width:22px;height:22px;border-radius:5px;border:1px solid var(--border);background:var(--s3);color:var(--dim);font-family:'DM Mono',monospace;font-size:10px;font-weight:600;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mbtn:hover{border-color:var(--bl);color:var(--text);}
+.mbtn.aN{background:rgba(136,146,176,.2);border-color:var(--N);color:var(--N);}
+.mbtn.aL{background:rgba(96,165,250,.18);border-color:var(--L);color:var(--L);}
+.mbtn.aM{background:rgba(245,197,24,.18);border-color:var(--M);color:var(--M);}
+.mbtn.aG{background:rgba(251,146,60,.18);border-color:var(--G);color:var(--G);}
+.mbtn.aC{background:rgba(249,112,102,.18);border-color:var(--C);color:var(--C);}
+.qscore{font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);text-align:right;}
+
+.dom-calc-note{margin:0 10px 8px;padding:6px 9px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.dom-calc-note span{flex:1;}
+.override-badge{font-size:9px;padding:1px 6px;border-radius:3px;background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.3);cursor:pointer;flex-shrink:0;font-family:'DM Mono',monospace;}
+.override-badge:hover{background:rgba(167,139,250,.25);}
+.diverge-alert{display:none;margin:0 10px 8px;padding:7px 10px;background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.35);border-radius:6px;font-size:10px;color:var(--yellow);font-family:'DM Mono',monospace;line-height:1.5;align-items:flex-start;gap:6px;}
+.diverge-alert.on{display:flex;}
+
+.frm{display:flex;align-items:center;flex-wrap:wrap;gap:5px;font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);padding:7px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border);margin-top:9px;}
+
+.sticky-col{display:flex;flex-direction:column;gap:12px;position:sticky;top:72px;align-self:start;}
+.res-card{background:var(--surface);border:1px solid var(--border);border-radius:13px;overflow:hidden;}
+.rc{padding:12px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.rc:last-child{border-bottom:none;}
+.rcn{font-size:11px;font-weight:500;color:var(--muted);}
+.rcd{font-size:9px;color:var(--dim);font-family:'DM Mono',monospace;}
+.rbadge{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:18px;font-weight:700;transition:all .3s;}
+.bN{background:rgba(136,146,176,.15);color:var(--N);border:2px solid var(--N);}
+.bL{background:rgba(96,165,250,.15);color:var(--L);border:2px solid var(--L);}
+.bM{background:rgba(245,197,24,.15);color:var(--M);border:2px solid var(--M);}
+.bG{background:rgba(251,146,60,.15);color:var(--G);border:2px solid var(--G);}
+.bC{background:rgba(249,112,102,.15);color:var(--C);border:2px solid var(--C);}
+.bempty{background:var(--s2);color:var(--dim);border:2px dashed var(--border);font-size:14px;}
+
+.vcard{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:18px;text-align:center;transition:all .4s;}
+.vi{font-size:32px;margin-bottom:8px;}
+.vl{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:4px;}
+.vs{font-size:11px;color:var(--muted);line-height:1.5;}
+.vd{border-color:var(--green)!important;background:rgba(62,207,142,.05)!important;}
+.vd .vl{color:var(--green);}
+.vi2{border-color:var(--red)!important;background:rgba(249,112,102,.05)!important;}
+.vi2 .vl{color:var(--red);}
+.vimp{border-color:var(--orange)!important;background:rgba(251,146,60,.05)!important;}
+.vimp .vl{color:var(--orange);}
+.vtab{margin-top:10px;padding:8px 10px;background:var(--s2);border-radius:6px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;line-height:1.8;}
+.tabgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;font-size:10px;font-family:'DM Mono',monospace;}
+
+.banner{background:rgba(251,146,60,.1);border:1px solid var(--orange);border-radius:7px;padding:8px 12px;font-size:11px;color:var(--orange);margin-bottom:12px;display:none;}
+.banner.on{display:block;}
+.minta{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;color:var(--muted);line-height:1.8;white-space:pre-wrap;font-family:'DM Mono',monospace;max-height:210px;overflow-y:auto;display:none;}
+.minta.on{display:block;}
+
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+footer{text-align:center;padding:16px;font-size:10px;color:var(--dim);border-top:1px solid rgba(201,168,76,.15);font-family:'DM Mono',monospace;}
+footer span{color:rgba(201,168,76,.4);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <img class="logo-img" src="data:image/jpeg;base64,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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHY6XwNnNNTZXlmIqrps4vGWbFyqiYiqKa64pmY3iY32n3KR9nfRXxTUHeLP0kw4e9ew+It4jD3a7N61VFdu5RVNNVFUTvExMc8TE9bveXGte2GoPEr3mQ8qzfuTHhV7qRYuW6Infp1UD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95kXhMz3XfiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpHs76K+Kag7xZ+kn7lxrXthqDxK95jlxrXthqDxK95jhMz3TiMfsUD7O+ivimoO8WfpJu1RgbOV6mzTLMPVXVZwmMvWLdVcxNU00VzTEztERvtHudhy41r2w1B4le8zosRevYjEXMRiLtd69dqmu5crqmqquqZ3mZmeeZmetKxbN+3M+LXvOF+5briNynR8wExHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/2Q==" alt="Mapa Previdência">
+    <div class="logo-divider"></div>
+    <div class="logo-text">
+      <h1>Calculadora BPC/LOAS</h1>
+      <p>AVALIAÇÃO BIOPSICOSSOCIAL · Portaria MDS/INSS nº 2/2015</p>
+    </div>
+  </div>
+  <div style="display:flex;gap:7px;align-items:center;">
+    <div class="hbadge">Art. 20 §§ 2º e 10 — LOAS</div>
+    <button class="btn" onclick="resetAll()">↺ Limpar</button>
+  </div>
+</header>
+
+<div class="wrap">
+<div><!-- main col -->
+
+  <!-- PDF IMPORT -->
+  <div class="pdf-card">
+    <div class="pdf-head">
+      <div class="pdf-title">📋 Importar texto da Avaliação INSS <span style="font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(201,168,76,.15);color:var(--gold-light);font-family:'DM Mono',monospace;border:1px solid rgba(201,168,76,.3);">PARSER</span></div>
+      <button class="btn btn-gold" onclick="togPdfPanel()" id="pdf-toggle-btn" style="font-size:11px;padding:4px 10px;">▾ Abrir</button>
+    </div>
+    <div id="pdf-panel" style="display:none;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6;">
+        <b style="color:var(--gold-light);">Como usar:</b> Abra o PDF da avaliação biopsicossocial do INSS,
+        pressione <kbd style="background:var(--s3);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:10px;">Ctrl+A</kbd> para selecionar tudo,
+        <kbd style="background:var(--s3);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:10px;">Ctrl+C</kbd> para copiar,
+        cole abaixo e clique em <b style="color:var(--gold-light);">Analisar</b>.
+        <span style="color:var(--dim);">Funciona com PDFs digitais do sistema INSS.</span>
+      </div>
+      <textarea id="pdf-text" placeholder="Cole aqui o texto copiado do PDF da avaliação biopsicossocial (Espécie B87 — Portaria 2/2015)…" style="width:100%;height:130px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:11px;font-family:'DM Mono',monospace;padding:10px;resize:vertical;line-height:1.5;transition:border-color .2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+        <button class="btn btn-gold" onclick="parsePDFText()" style="font-size:12px;">⚡ Analisar e preencher</button>
+        <button class="btn" onclick="document.getElementById('pdf-text').value='';showPDFStatus('','');" style="font-size:11px;">✕ Limpar</button>
+        <div id="pdf-status" class="pdf-status" style="flex:1;margin-top:0;"></div>
+      </div>
+      <div class="pdf-bar" id="pdf-bar"><div class="pdf-bar-fill" id="pdf-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div style="font-size:9px;color:var(--dim);font-family:'DM Mono',monospace;margin-bottom:4px;letter-spacing:.5px;">FAIXA ETÁRIA</div>
+      <div class="age-tabs">
+        <div class="atab on" id="tab-a" onclick="setAge('adulto')">16 anos ou mais</div>
+        <div class="atab" id="tab-m" onclick="setAge('menor')">Menor de 16 anos</div>
+      </div>
+    </div>
+    <div class="vdiv"></div>
+    <div style="flex:1;">
+      <div class="trow" onclick="togImp()" style="background:transparent;padding:0;margin:0;">
+        <div class="tlabel"><b>Alterações resolvíveis em menos de 2 anos?</b><small>Se SIM → indeferimento imediato (art. 8º, III)</small></div>
+        <div class="tsw" id="sw-imp"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="banner" class="banner">⚠ Impedimento &lt; 2 anos → indeferimento imediato conforme art. 8º, III da Portaria 2/2015.</div>
+
+  <div class="legend">
+    <span style="font-size:9px;color:var(--dim);font-family:'DM Mono',monospace;">ESCALA:</span>
+    <div class="li"><div class="ldot" style="background:var(--N)"></div>0·N Nenhuma</div>
+    <div class="li"><div class="ldot" style="background:var(--L)"></div>1·L Leve</div>
+    <div class="li"><div class="ldot" style="background:var(--M)"></div>2·M Moderada</div>
+    <div class="li"><div class="ldot" style="background:var(--G)"></div>3·G Grave</div>
+    <div class="li"><div class="ldot" style="background:var(--C)"></div>4·C Completa</div>
+    <span style="font-size:9px;color:var(--dim);font-family:'DM Mono',monospace;margin-left:4px;">▾ Clique no domínio para pontuar os quesitos</span>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">⬡ Fatores Ambientais <span class="tag tag-s">SOCIAL</span></div>
+      <span style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;">e1–e5 · [(Σ dom.)×5]−0,1</span>
+    </div>
+    <div class="card-body">
+      <div class="dgrid" id="grid-e"></div>
+      <div class="frm" id="frm-e">FA Final: <span style="color:var(--muted)">aguardando e1–e5…</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">⬡ Funções do Corpo <span class="tag tag-m">MÉDICO</span></div>
+      <span style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;">b1–b8 · Maior qualificador</span>
+    </div>
+    <div class="card-body">
+      <div class="dgrid" id="grid-b"></div>
+      <div style="margin-top:12px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:7px;font-weight:500;">Majoração (art. 7º — não cumulativas)</div>
+        <div class="trow" onclick="togMajor('e')"><div class="tlabel"><b>Estrutura do Corpo &gt; Função</b><small>Alterações estruturais mais graves que funcionais</small></div><div class="tsw" id="sw-e"></div></div>
+        <div class="trow" onclick="togMajor('p')"><div class="tlabel"><b>Prognóstico Desfavorável</b><small>Elevação não cumulativa com o item anterior</small></div><div class="tsw" id="sw-p"></div></div>
+      </div>
+      <div class="frm" id="frm-b">FC Final: <span style="color:var(--muted)">aguardando b1–b8…</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">⬡ Atividades e Participação <span class="tag tag-x">MISTO</span></div>
+      <span style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;">d1–d9 · [(Σ dom.)×2,7778]−0,1</span>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:140px;padding:5px 9px;background:rgba(62,207,142,.07);border:1px solid rgba(62,207,142,.2);border-radius:6px;font-size:10px;color:#3ecf8e;">🩺 <b>d1–d5</b> · Perito Médico</div>
+        <div style="flex:1;min-width:140px;padding:5px 9px;background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:6px;font-size:10px;color:#60a5fa;">👥 <b>d6–d9</b> · Assistente Social</div>
+      </div>
+      <div class="dgrid" id="grid-d"></div>
+      <div class="frm" id="frm-d">AP Final: <span style="color:var(--muted)">aguardando d1–d9…</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">📋 Minuta para Fundamentação <span class="tag tag-r">AUTO</span></div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn" onclick="gerarMinuta()">Gerar texto</button>
+        <button class="btn btn-primary" id="btn-cp" onclick="copiarMinuta()" style="display:none;">Copiar ↗</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div id="minta" class="minta"></div>
+      <div id="minta-ph" style="font-size:11px;color:var(--dim);text-align:center;padding:14px;">Preencha os qualificadores e clique em "Gerar texto" para obter a minuta automática.</div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div class="sticky-col">
+  <div class="res-card">
+    <div class="card-head" style="padding:12px 15px;"><div class="card-title" style="font-size:13px;">Resultado Final</div></div>
+    <div class="rc"><div><div class="rcn">Fatores Ambientais</div><div class="rcd">e1·e2·e3·e4·e5</div></div><div class="rbadge bempty" id="b-e">—</div></div>
+    <div class="rc"><div><div class="rcn">Atividades e Participação</div><div class="rcd">d1–d9</div></div><div class="rbadge bempty" id="b-d">—</div></div>
+    <div class="rc"><div><div class="rcn">Funções do Corpo</div><div class="rcd">b1–b8</div></div><div class="rbadge bempty" id="b-b">—</div></div>
+  </div>
+
+  <div class="vcard" id="vcard">
+    <div class="vi" id="v-ic">⏳</div>
+    <div class="vl" id="v-lb">Aguardando</div>
+    <div class="vs" id="v-sb">Preencha todos os qualificadores.</div>
+    <div class="vtab" id="v-tb" style="display:none;"></div>
+  </div>
+
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-head" style="padding:10px 14px;"><div class="card-title" style="font-size:12px;">Tabela Conclusiva — Anexo IV</div></div>
+    <div style="padding:10px 14px;">
+      <div style="font-size:9px;color:var(--dim);font-family:'DM Mono',monospace;margin-bottom:6px;">FC (linha) × AP (coluna)</div>
+      <div class="tabgrid" id="tabvis"></div>
+      <div style="margin-top:6px;font-size:9px;color:var(--dim);font-family:'DM Mono',monospace;">★ = FA ≥ Grave necessário</div>
+    </div>
+  </div>
+
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px;">
+    <div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;line-height:1.9;">
+      <div style="color:var(--muted);margin-bottom:4px;font-weight:500;">Base Normativa</div>
+      <div>· Portaria Conjunta MDS/INSS nº 2/2015</div>
+      <div>· Lei 8.742/93 (LOAS) — art. 20</div>
+      <div>· Decreto 6.214/2007</div>
+      <div>· Convenção ONU sobre Direitos PcD</div>
+      <div>· CIF — Classificação Internacional</div>
+    </div>
+  </div>
+</div>
+</div><!-- /wrap -->
+
+<footer>
+  Calculadora BPC/LOAS · Avaliação Biopsicossocial · Portaria Conjunta MDS/INSS nº 2/2015
+  <span>·</span> Ferramenta de apoio — não substitui análise jurídica ou pericial
+  <span>·</span> Mapa Previdência
+</footer>
+
+<script>
+// =====================================================================
+// DADOS: domínios + quesitos (Portaria 2/2015)
+// =====================================================================
+const DOM={
+  e1:{code:'e1',name:'Produtos e Tecnologia',g:'e',full:false,q:[
+    {n:1,cif:'e110',t:'Produtos ou substâncias para consumo pessoal (alimentação, dieta especial, medicação prescrita, entre outros)'},
+    {n:2,cif:'e115',t:'Produtos e tecnologia para uso pessoal e na vida diária (órtese/prótese, óculos, lentes, nebulizador, fraldas, cama hospitalar, entre outros)'},
+    {n:3,cif:'e120',t:'Produtos e tecnologia para mobilidade e transporte pessoal (cadeira de rodas, muletas, andador, bengala, veículos adaptados, entre outros)'},
+    {n:4,cif:'e125',t:'Produtos e tecnologia para comunicação (prótese de voz, aparelhos auditivos, computador, internet, telefone, televisão, entre outros)'},
+    {n:5,cif:'e130/35/40',t:'Produtos e tecnologia para educação, cultura, lazer e trabalho (livros, brinquedos, ferramentas, hardwares, softwares, instrumentos musicais, entre outros)'},
+    {n:6,cif:'e150/55',t:'Produtos para acesso às instalações de uso público/privado (rampa, corrimão, piso tátil, elevador sonorizado, instalações sanitárias acessíveis, entre outros)'},
+    {n:7,cif:'e165',t:'Produtos ou objetos de intercâmbio econômico (acesso a dinheiro, mercadorias; grau de comprometimento da renda com gastos de saúde, cuidado e tratamento)'},
+  ]},
+  e2:{code:'e2',name:'Habitabilidade e Mudanças Ambientais',g:'e',full:false,q:[
+    {n:8,cif:'e210/225/230/235',t:'Nível de vulnerabilidade e risco das condições de habitabilidade (morro, córrego, desabamento, inundações, poluição, violência, entre outros)'},
+    {n:9,cif:'e298/299',t:'Situação e condição de habitabilidade (moradia própria/alugada/cedida/de favor, tipo de construção, grau de privacidade, acessibilidade, entre outros)'},
+  ]},
+  e3:{code:'e3',name:'Apoio e Relacionamentos',g:'e',full:false,q:[
+    {n:10,cif:'e310/315',t:'Disponibilidade da família em oferecer apoio físico, emocional, afetivo, proteção e cuidados'},
+    {n:11,cif:'e320/325',t:'Disponibilidade de amigos, conhecidos, colegas, vizinhos e membros da comunidade em oferecer apoio e cuidados'},
+    {n:12,cif:'e340/355/360',t:'Disponibilidade de apoio de profissionais de saúde, cuidadores e outros profissionais'},
+    {n:13,cif:'e350',t:'Disponibilidade de animais de estimação que proporcionem apoio físico, emocional, psíquico e terapêutico (cão-guia, cavalos, cães, gatos, entre outros)'},
+    {n:14,cif:'e398',t:'Condições familiares que interferem na disponibilidade de apoio (idosos, PcD, doença crônica, dependência química, sobrecarga de cuidadores, desemprego)'},
+  ]},
+  e4:{code:'e4',name:'Atitudes',g:'e',full:false,q:[
+    {n:15,cif:'e410/415',t:'Situações de preconceito, estigma, discriminação, superproteção ou negligência de membros da família'},
+    {n:16,cif:'e420/425/430/435/440/460',t:'Situações de preconceito, estigma, discriminação, superproteção ou negligência de amigos, vizinhos, colegas, membros ou grupos sociais da comunidade/sociedade'},
+    {n:17,cif:'e450/499',t:'Situações de preconceito, discriminação, superproteção ou negligência de cuidadores, profissionais de saúde, educação, pessoas em posição de autoridade, inclusive em relação ao trabalho'},
+  ]},
+  e5:{code:'e5',name:'Serviços, Sistemas e Políticas',g:'e',full:true,q:[
+    {n:18,cif:'e525',t:'Serviços de habitação (políticas habitacionais com acessibilidade e proximidade de equipamentos públicos)'},
+    {n:19,cif:'e530',t:'Serviços públicos básicos (abastecimento de água, esgoto, energia elétrica, coleta de lixo, correios, entre outros)'},
+    {n:20,cif:'e535/560',t:'Serviços de comunicação (telefone, correio, e-mail, rádio, televisão, jornais, internet, serviços em Braille, entre outros)'},
+    {n:21,cif:'e540',t:'Serviços de transporte (transporte coletivo e/ou adaptado, programa de livre acesso ao transporte coletivo)'},
+    {n:22,cif:'e545',t:'Serviços de proteção civil (emergência, ambulância, bombeiros, polícia, defesa civil, entre outros)'},
+    {n:23,cif:'e550',t:'Serviços legais (Fóruns, Tribunais, Ministério Público, Defensoria Pública, Conselho Tutelar, Cartórios, entre outros)'},
+    {n:24,cif:'e555',t:'Serviços de associações e organizações sem fins lucrativos'},
+    {n:25,cif:'e575',t:'Serviços de apoio social (compras, trabalho doméstico, transporte, cuidados com criança, cuidado pessoal, entre outros)'},
+    {n:26,cif:'e580',t:'Serviços de saúde (hospitais, postos, PSF, exames, cirurgias, habilitação e reabilitação, entre outros)'},
+    {n:27,cif:'e585',t:'Serviços de educação e treinamento (escolas inclusivas/especializadas, materiais pedagógicos adequados, acessibilidade, entre outros)'},
+    {n:28,cif:'e590',t:'Serviços relacionados ao trabalho e emprego (acesso ao trabalho, habilitação/reabilitação profissional, condições adequadas)'},
+    {n:29,cif:'e598',t:'Serviços de assistência social (PAIF, CRAS, CREAS e outros programas de proteção social)'},
+  ]},
+  b1:{code:'b1',name:'Funções Mentais',g:'b',full:false,q:[
+    {n:49,cif:'b110',t:'Funções da consciência (vigília, obnubilação, coma, estado vegetativo, estado de alerta, delírio, entre outros)'},
+    {n:50,cif:'b114',t:'Funções da orientação (relação da pessoa consigo própria, com outras pessoas, objetos, espaço, tempo e/ou ambiente)'},
+    {n:51,cif:'b117',t:'Funções intelectuais (funções cognitivas e desenvolvimento; deficiência intelectual, transtorno mental, demência, entre outras)'},
+    {n:52,cif:'b122',t:'Funções psicossociais globais (habilidades interpessoais necessárias para interações sociais recíprocas)'},
+    {n:53,cif:'b126',t:'Funções do temperamento e personalidade (extroversão, introversão, estabilidade psíquica e emocional, confiança, entre outras)'},
+    {n:54,cif:'b130',t:'Funções da energia e de impulsos (nível de energia, motivação, apetite, controle de impulsos, entre outras)'},
+    {n:55,cif:'b134',t:'Funções do sono (início, manutenção, quantidade e qualidade do sono)'},
+    {n:56,cif:'b140',t:'Funções da atenção (concentração, distração e distúrbios da atenção)'},
+    {n:57,cif:'b144',t:'Funções da memória (distúrbios da memória recente, remota e amnésica)'},
+    {n:58,cif:'b147',t:'Funções psicomotoras (atraso psicomotor, controle e coordenação, marcha, postura, ecolalia, catatonia, convulsão epiléptica, entre outras)'},
+    {n:59,cif:'b152',t:'Funções da emoção (regulação e amplitude da emoção, tristeza, medo, raiva, ansiedade, apatia afetiva, labilidade emocional, depressão, entre outras)'},
+    {n:60,cif:'b156',t:'Funções da percepção (reconhecimento e interpretação de estímulos sensoriais; alucinações ou ilusões, entre outras)'},
+    {n:61,cif:'b160',t:'Funções do pensamento (delírios, obsessões, compulsões, bloqueio, incoerência, fuga de ideias, entre outras)'},
+    {n:62,cif:'b164',t:'Funções cognitivas superiores (pensamento abstrato, tomada de decisão, planejamento, julgamento, flexibilidade mental, autoconhecimento, entre outras)'},
+    {n:63,cif:'b167',t:'Funções mentais da linguagem (recepção e expressão de linguagem gestual, decodificação e produção de mensagens)'},
+    {n:64,cif:'b172',t:'Funções de cálculo (operações matemáticas simples e complexas, procedimentos aritméticos, fórmulas matemáticas)'},
+    {n:65,cif:'b180',t:'Funções da experiência pessoal e de tempo (consciência da própria identidade, representação e consciência do corpo, percepção do tempo)'},
+  ]},
+  b2:{code:'b2',name:'Funções Sensoriais (Visão, Audição e Dor)',g:'b',full:false,q:[
+    {n:66,cif:'b210',t:'Funções da visão (acuidade, percepção de luz e cor, miopia, hipermetropia, astigmatismo, hemianopsia, cegueira, diplopia, entre outras)'},
+    {n:67,cif:'b215',t:'Funções das estruturas adjacentes ao olho (acomodação, reflexo pupilar, nistagmo, estrabismo, funções lacrimais, entre outras)'},
+    {n:68,cif:'b220',t:'Sensações associadas ao olho (pressão, cansaço, ressecamento, prurido, irritação, queimação, entre outras)'},
+    {n:69,cif:'b230',t:'Funções auditivas (detecção, discriminação e localização do som e da fala, perda da audição, entre outras)'},
+    {n:70,cif:'b235',t:'Funções vestibulares (determinação da posição, equilíbrio e movimentação do corpo, entre outras)'},
+    {n:71,cif:'b240',t:'Sensações associadas à audição e função vestibular (tontura, vertigem, zumbido, pressão auricular, entre outras)'},
+    {n:72,cif:'b250/255',t:'Funções gustativas e olfativas'},
+    {n:73,cif:'b260',t:'Funções proprioceptivas (percepção da posição relativa de partes do corpo)'},
+    {n:74,cif:'b265/270',t:'Função tátil e sensações relacionadas à temperatura (anestesia, parestesia, formigamento, hipoestesia, hiperestesia, ardor, entre outras)'},
+    {n:75,cif:'b280',t:'Sensação de dor (dor generalizada ou localizada, analgesia, hipoalgesia, hiperalgesia, entre outras)'},
+  ]},
+  b3:{code:'b3',name:'Funções da Voz e da Fala',g:'b',full:false,q:[
+    {n:76,cif:'b310',t:'Funções da voz (produção e qualidade da voz, disfonia, afonia, rouquidão, hiponasalidade, hipernasalidade, entre outras)'},
+    {n:77,cif:'b320',t:'Funções da articulação (produção de sons da fala, disartria, anartria, articulação de fonemas, entre outras)'},
+    {n:78,cif:'b330',t:'Funções da fluência e ritmo da fala (gagueira, verborreia, dislalia, taquilalia, bradilalia, entre outras)'},
+  ]},
+  b4:{code:'b4',name:'Cardiovascular / Hemato / Imuno / Respiratório',g:'b',full:false,q:[
+    {n:79,cif:'b410',t:'Funções do coração (ritmo, frequência, contratilidade, insuficiência, isquemia, bloqueio, valvulopatias, miocardiopatias)'},
+    {n:80,cif:'b415',t:'Funções dos vasos sanguíneos (alterações arteriais, venosas e capilares; varizes, aterosclerose, aneurismas, entre outras)'},
+    {n:81,cif:'b420',t:'Funções da pressão sanguínea (hipotensão, hipertensão)'},
+    {n:82,cif:'b430',t:'Funções hematológicas (anemias, linfomas, leucemias, aplasia medular, doença falciforme, talassemias, coagulopatias, entre outras)'},
+    {n:83,cif:'b435',t:'Funções do sistema imunológico (doenças autoimunes, imunossupressão, câncer, reações alérgicas, linfedema, entre outras)'},
+    {n:84,cif:'b440',t:'Funções respiratórias (frequência, ritmo, profundidade; dispneia, taquipneia, espasmo brônquico, enfisema pulmonar, entre outras)'},
+  ]},
+  b5:{code:'b5',name:'Digestivo / Metabólico / Endócrino',g:'b',full:false,q:[
+    {n:85,cif:'b510',t:'Funções de ingestão (sucção, mordedura, mastigação, deglutição, regurgitação, vômito, entre outras)'},
+    {n:86,cif:'b515',t:'Funções digestivas (peristalse, degradação dos alimentos, absorção dos nutrientes, tolerância aos alimentos, entre outras)'},
+    {n:87,cif:'b525',t:'Funções da defecação (consistência, frequência e continência fecal, flatulência, entre outras)'},
+    {n:88,cif:'b530',t:'Funções de manutenção de peso (baixo peso, caquexia, emaciação, obesidade, entre outras)'},
+    {n:89,cif:'b540',t:'Funções metabólicas gerais (metabolismo basal, de carboidratos, de proteínas ou gorduras, lipodistrofia, entre outras)'},
+    {n:90,cif:'b545',t:'Funções de equilíbrio hídrico, mineral e eletrolítico'},
+    {n:91,cif:'b555/560',t:'Funções das glândulas endócrinas (hipo/hiperpituitarismo, hipo/hipertireoidismo, nanismo, gigantismo, entre outras)'},
+  ]},
+  b6:{code:'b6',name:'Funções Geniturinárias e Reprodutivas',g:'b',full:false,q:[
+    {n:92,cif:'b610',t:'Funções relacionadas à filtração ou eliminação da urina (insuficiência renal, anúria, oligúria, hidronefrose, entre outras)'},
+    {n:93,cif:'b620',t:'Funções urinárias (frequência de micção, continência, urgência, retenção, fluxo excessivo, poliúria, entre outras)'},
+    {n:94,cif:'b640/650/660',t:'Função reprodutiva (funções sexuais, menstruação, endometriose, funções de procriação, entre outras)'},
+  ]},
+  b7:{code:'b7',name:'Neuromusculoesquelético e Movimento',g:'b',full:false,q:[
+    {n:95,cif:'b710/715/720',t:'Funções das articulações e/ou dos ossos (mobilidade das articulações e dos ossos)'},
+    {n:96,cif:'b730/735/740',t:'Funções musculares (relacionadas à força, ao tônus e à resistência muscular)'},
+    {n:97,cif:'b750/755/760/765',t:'Funções dos movimentos (reflexos motores, movimentos involuntários, controle voluntário e involuntário)'},
+    {n:98,cif:'b770',t:'Funções relacionadas ao padrão da marcha (marcha espástica, hemiplégica, paraplégica, entre outras)'},
+  ]},
+  b8:{code:'b8',name:'Funções da Pele e Estruturas Relacionadas',g:'b',full:false,q:[
+    {n:99,cif:'b810/820/830/840/850',t:'Funções protetoras, reparadoras e outras funções da pele e fâneros (pênfigo, psoríase, hanseníase, neurofibromatose, queimaduras, albinismo, vitiligo, entre outras)'},
+  ]},
+  d1:{code:'d1',name:'Aprendizagem e Aplicação do Conhecimento',g:'d',full:false,sub:'medico',q:[
+    {n:100,cif:'d110',t:'Dificuldade para utilizar intencionalmente o sentido da visão (seguir objeto, observar pessoas, assistir evento, entre outras)'},
+    {n:101,cif:'d115',t:'Dificuldade para utilizar intencionalmente o sentido da audição (ouvir rádio, música, voz humana, entre outras)'},
+    {n:102,cif:'d120',t:'Dificuldade em percepções sensoriais intencionais de tato, paladar e olfato'},
+    {n:103,cif:'d130',t:'Dificuldade para imitar ou copiar algo que configure aprendizagem básica (imitar um gesto ou som, copiar números ou letras, entre outras)'},
+    {n:104,cif:'d140/166',t:'Dificuldade para aprender a ler e utilizar este conhecimento (inclusive em Braille)'},
+    {n:105,cif:'d145/170',t:'Dificuldade para aprender a escrever e utilizar este conhecimento (inclusive em Braille)'},
+    {n:106,cif:'d150/172',t:'Dificuldade para aprender a calcular e aplicar este conhecimento'},
+    {n:107,cif:'d155',t:'Dificuldade para adquirir e executar habilidades básicas (talheres, lápis) e complexas (jogos, esportes, ferramentas, relógio)'},
+    {n:108,cif:'d160/175/177',t:'Dificuldade para concentrar a atenção, encontrar solução para problemas simples e complexos e tomar decisões'},
+  ]},
+  d2:{code:'d2',name:'Tarefas e Demandas Gerais',g:'d',full:false,sub:'medico',q:[
+    {n:109,cif:'d220/230',t:'Dificuldade para realizar tarefas múltiplas, atender a comandos múltiplos, realizar a rotina diária, de forma independente ou a comando de outros'},
+    {n:110,cif:'d240',t:'Dificuldade para lidar com o estresse e outras demandas psicológicas (responsabilidades, gerenciar e controlar crises)'},
+  ]},
+  d3:{code:'d3',name:'Comunicação',g:'d',full:false,sub:'medico',q:[
+    {n:111,cif:'d310',t:'Dificuldade na recepção de mensagens orais (compreender o significado de uma frase)'},
+    {n:112,cif:'d315',t:'Dificuldade na recepção de mensagens não verbais (gestos, símbolos, fotos, desenhos, expressões faciais, leitura labial)'},
+    {n:113,cif:'d320',t:'Dificuldade na recepção e compreensão de mensagens na Língua Brasileira de Sinais (LIBRAS)'},
+    {n:114,cif:'d325',t:'Dificuldade na recepção e compreensão de mensagens escritas ou em Braille'},
+    {n:115,cif:'d330',t:'Dificuldade na fala (produção de sílabas, palavras, frases ou mensagens compreensíveis)'},
+    {n:116,cif:'d335',t:'Dificuldade na produção de mensagens não verbais (usar gestos, símbolos ou desenhos para se comunicar)'},
+    {n:117,cif:'d340',t:'Dificuldade na produção de mensagens na Língua Brasileira de Sinais (LIBRAS)'},
+    {n:118,cif:'d350',t:'Dificuldade na conversação (iniciar, manter e finalizar uma troca de pensamentos e ideias, usando qualquer forma de linguagem)'},
+  ]},
+  d4:{code:'d4',name:'Mobilidade',g:'d',full:false,sub:'medico',q:[
+    {n:119,cif:'d410',t:'Dificuldade para mudar a posição básica do corpo (levantar, ajoelhar, agachar, deitar e/ou rolar)'},
+    {n:120,cif:'d420',t:'Dificuldade para se mover na mesma superfície ou de uma superfície para outra, sem mudar a posição do corpo'},
+    {n:121,cif:'d430/435/440/445',t:'Dificuldade para manusear, mover, deslocar e/ou carregar objetos, realizando movimentos finos'},
+    {n:122,cif:'d450',t:'Dificuldade para andar (mover-se a pé, por curtas ou longas distâncias, sem auxílio)'},
+    {n:123,cif:'d465',t:'Dificuldade para se deslocar utilizando equipamento ou dispositivo específico (andador, cadeira de rodas, muletas, bengala e outros)'},
+  ]},
+  d5:{code:'d5',name:'Cuidado Pessoal',g:'d',full:false,sub:'medico',q:[
+    {n:124,cif:'d510/520/530',t:'Dificuldade nos cuidados com o próprio corpo (lavar, secar, cuidar das mãos, dentes, unhas, nariz, cabelos, higiene após excreção)'},
+    {n:125,cif:'d540',t:'Dificuldade para se vestir (colocar, tirar e escolher roupas e calçados apropriados)'},
+    {n:126,cif:'d550/560',t:'Dificuldade para coordenar os gestos para comer, beber alimentos e bebidas servidos, sem auxílio'},
+    {n:127,cif:'d570/598',t:'Dificuldade para cuidar da própria saúde (conforto físico, dieta, prevenção de doenças, busca de assistência, exposição a riscos)'},
+  ]},
+  d6:{code:'d6',name:'Vida Doméstica',g:'d',full:false,sub:'social',q:[
+    {n:30,cif:'d610',t:'Dificuldade para obter um lugar para morar (comprar, alugar, tomar emprestado, mobiliar, arrumar, entre outras)'},
+    {n:31,cif:'d620',t:'Dificuldade para obter bens e serviços (selecionar, adquirir e transportar bens e produtos para uso doméstico)'},
+    {n:32,cif:'d630',t:'Dificuldade para preparar e servir refeições simples e complexas para si próprio e para outros'},
+    {n:33,cif:'d640',t:'Dificuldade para planejar, administrar e realizar tarefas domésticas (limpar, arrumar, lavar, passar roupa, armazenar alimentos, remover lixo)'},
+    {n:34,cif:'d650',t:'Dificuldade para cuidar de objetos da casa, de objetos pessoais, de plantas e animais'},
+    {n:35,cif:'d660',t:'Dificuldade para ajudar os outros (auxiliar membros da casa no aprendizado, comunicação, cuidado pessoal e movimento)'},
+  ]},
+  d7:{code:'d7',name:'Relações e Interações Interpessoais',g:'d',full:false,sub:'social',q:[
+    {n:36,cif:'d710',t:'Dificuldade para estabelecer interações pessoais básicas (respeito, discernimento, afeto, tolerância, contato físico contextual e apropriado)'},
+    {n:37,cif:'d720',t:'Dificuldade para estabelecer interações pessoais complexas (iniciar, manter ou terminar relações, controlando emoções, impulsos, agressões)'},
+    {n:38,cif:'d730',t:'Dificuldade para estabelecer contatos ou ligações temporárias com estranhos (solicitar algo, agradecimento, perguntar um caminho)'},
+    {n:39,cif:'d740',t:'Dificuldade para criar e manter relações específicas em ambientes formais (professores, funcionários, profissionais, prestadores de serviços)'},
+    {n:40,cif:'d750',t:'Dificuldade para iniciar relações informais com outros (amigos, vizinhos, conhecidos, colegas de moradia)'},
+    {n:41,cif:'d760',t:'Dificuldade para criar e manter relações de parentesco com membros do núcleo familiar e parentes'},
+  ]},
+  d8:{code:'d8',name:'Áreas Principais da Vida',g:'d',full:false,sub:'social',q:[
+    {n:42,cif:'d820',t:'Dificuldade no ensino fundamental, médio ou educação de adultos (frequência regular, trabalho em equipe, interação adequada)'},
+    {n:43,cif:'d825',t:'Dificuldade em curso técnico e/ou profissionalizante (frequência regular, trabalho em equipe, interação com professores e funcionários)'},
+    {n:44,cif:'d830',t:'Dificuldade no ensino superior ou pós-graduação (frequência regular, trabalho em equipe, interação adequada)'},
+    {n:45,cif:'d860/865',t:'Dificuldade para realizar transações econômicas (comprar, trocar, negociar, manter conta bancária, economizar dinheiro)'},
+  ]},
+  d9:{code:'d9',name:'Vida Comunitária, Social e Cívica',g:'d',full:true,sub:'social',q:[
+    {n:46,cif:'d910',t:'Dificuldade para participar de reuniões comunitárias, cerimônias sociais, associações e grupos sociais'},
+    {n:47,cif:'d920',t:'Dificuldade para participar de atividades recreativas e de lazer (excursões, artesanato, jogos, esportes, cinema, museus, entre outras)'},
+    {n:48,cif:'d940/950',t:'Dificuldade para participar da vida social e política enquanto cidadão (direitos políticos, civis e sociais)'},
+  ]},
+};
+
+const LBL=['N','L','M','G','C'],NUM={N:0,L:1,M:2,G:3,C:4},NM={N:'Nenhuma',L:'Leve',M:'Moderada',G:'Grave',C:'Completa'};
+
+let S={age:'adulto',imp:false,majE:false,majP:false,
+  e:{e1:null,e2:null,e3:null,e4:null,e5:null},
+  b:{b1:null,b2:null,b3:null,b4:null,b5:null,b6:null,b7:null,b8:null},
+  d:{d1:null,d2:null,d3:null,d4:null,d5:null,d6:null,d7:null,d8:null,d9:null},
+};
+let qScores={};
+let domOverride={};
+let openP={};
+Object.keys(DOM).forEach(k=>{qScores[k]={};DOM[k].q.forEach((_,i)=>qScores[k][i]=null);});
+
+// =====================================================================
+// HELPERS
+// =====================================================================
+function s2q(r){if(r<1)return'N';if(r<2)return'L';if(r<3)return'M';if(r<4)return'G';return'C';}
+function calcDomFromQ(key){
+  const sc=Object.values(qScores[key]).filter(v=>v!==null);
+  if(!sc.length)return null;
+  return s2q(sc.reduce((a,b)=>a+b,0)/sc.length);
+}
+function getDomVal(key){
+  if(domOverride[key])return S[DOM[key].g][key];
+  // Always compute live from quesitos — never rely on stale S
+  return calcDomFromQ(key);
+}
+function calcFA(){
+  const v=['e1','e2','e3','e4','e5'].map(k=>getDomVal(k));
+  if(v.includes(null))return null;
+  return s2q(v.map(x=>NUM[x]).reduce((a,b)=>a+b,0)*5-0.1);
+}
+function calcFC(){
+  const v=['b1','b2','b3','b4','b5','b6','b7','b8'].map(k=>getDomVal(k));
+  if(v.includes(null))return null;
+  let m=Math.max(...v.map(x=>NUM[x]));
+  if((S.majE||S.majP)&&m<4)m++;
+  return LBL[m];
+}
+function calcAP(){
+  const v=['d1','d2','d3','d4','d5','d6','d7','d8','d9'].map(k=>getDomVal(k));
+  if(v.includes(null))return null;
+  return s2q(v.map(x=>NUM[x]).reduce((a,b)=>a+b,0)*2.777777778-0.1);
+}
+function tabela(e,d,b){
+  if(!e||!d||!b)return null;
+  const bn=NUM[b],dn=NUM[d];
+  if(bn<=1||dn<=1)return false;
+  if(bn===2&&dn===2)return NUM[e]>=3;
+  return true;
+}
+
+// =====================================================================
+// BUILD BLOCKS
+// =====================================================================
+function buildBlock(key){
+  const d=DOM[key];
+  const isOpen=!!openP[key];
+  const subLbl=d.sub==='medico'?'Perito Médico':d.sub==='social'?'Assistente Social':'';
+  const eff=getDomVal(key);
+  const isOvr=!!domOverride[key];
+
+  const block=document.createElement('div');
+  block.className='dblock'+(d.full?' full':'');
+  block.id='blk-'+key;
+
+  const head=document.createElement('div');
+  head.className='dhead';
+
+  const nameBtn=document.createElement('button');
+  nameBtn.className='dname-btn';
+  nameBtn.onclick=()=>togPanel(key);
+  nameBtn.innerHTML=`<div class="dcode">${d.code.toUpperCase()}${subLbl?' · '+subLbl:''}</div><div class="dname">${d.name} <span class="chev${isOpen?' open':''}" id="chev-${key}">▾</span></div>`;
+
+  const badgeCol=document.createElement('div');
+  badgeCol.className='dbadge-col';
+  const prev=document.createElement('div');
+  prev.id='prev-'+key;
+  prev.className='dprev'+(eff?' b'+eff:'');
+  prev.textContent=eff||'—';
+  badgeCol.appendChild(prev);
+  head.appendChild(nameBtn);head.appendChild(badgeCol);
+  block.appendChild(head);
+
+  const qrow=document.createElement('div');
+  qrow.className='qrow';qrow.id='qrow-'+key;
+  LBL.forEach(lbl=>{
+    const btn=document.createElement('button');
+    const isActive=isOvr&&S[d.g][key]===lbl;
+    btn.className='qbtn'+(isActive?' a'+lbl:'');
+    btn.textContent=lbl;btn.title='Definir qualificador manualmente';
+    btn.onclick=()=>setDomManual(d.g,key,lbl);
+    qrow.appendChild(btn);
+  });
+  block.appendChild(qrow);
+
+  const qp=document.createElement('div');
+  qp.className='qpanel'+(isOpen?' open':'');qp.id='qp-'+key;
+  const qi=document.createElement('div');qi.className='qinner';
+  qi.innerHTML=`<div class="qptitle">Quesitos — ${d.code.toUpperCase()} · Portaria 2/2015</div>`;
+
+  const note=document.createElement('div');note.className='dom-calc-note';note.id='note-'+key;
+  note.innerHTML=`<span id="note-txt-${key}" style="color:var(--dim)">Pontue os quesitos — o qualificador do domínio será calculado automaticamente pela média.</span>
+    <span class="override-badge" id="ovr-btn-${key}" onclick="clearOverride('${key}')" style="display:none;">✕ Limpar manual</span>`;
+  qi.appendChild(note);
+  // Divergence alert (shown when manual override differs from auto)
+  const dAlert=document.createElement('div');dAlert.className='diverge-alert';dAlert.id='div-alert-'+key;
+  dAlert.innerHTML='<span style="flex-shrink:0;">⚠</span><span id="div-txt-'+key+'"></span>';
+  qi.appendChild(dAlert);
+
+  d.q.forEach((q,i)=>{
+    const item=document.createElement('div');
+    item.className='qitem';item.id=`qi-${key}-${i}`;
+    const left=document.createElement('div');left.className='qitem-left';
+    left.innerHTML=`<div class="qitem-header"><span class="qnum">${q.n}.</span><span class="qcif">${q.cif}</span></div><div class="qtext">${q.t}</div>`;
+    const right=document.createElement('div');right.className='qitem-right';
+    const mr=document.createElement('div');mr.className='mini-row';mr.id=`mr-${key}-${i}`;
+    [0,1,2,3,4].forEach(v=>{
+      const mb=document.createElement('button');
+      const cur=qScores[key][i];const lbl=LBL[v];
+      mb.className='mbtn'+(cur===v?' a'+lbl:'');mb.textContent=v;mb.title=`${v} · ${NM[lbl]}`;
+      mb.onclick=()=>setQScore(key,i,v,d.g);
+      mr.appendChild(mb);
+    });
+    const qlbl=document.createElement('div');qlbl.className='qscore';qlbl.id=`qlbl-${key}-${i}`;
+    const cur=qScores[key][i];
+    qlbl.textContent=cur!==null?`${cur} · ${NM[LBL[cur]]}`:'não pontuado';
+    right.appendChild(mr);right.appendChild(qlbl);
+    item.appendChild(left);item.appendChild(right);qi.appendChild(item);
+  });
+  qp.appendChild(qi);block.appendChild(qp);
+  return block;
+}
+
+function renderGrids(){
+  ['e1','e2','e3','e4','e5'].forEach(k=>document.getElementById('grid-e').appendChild(buildBlock(k)));
+  ['b1','b2','b3','b4','b5','b6','b7','b8'].forEach(k=>document.getElementById('grid-b').appendChild(buildBlock(k)));
+  ['d1','d2','d3','d4','d5','d6','d7','d8','d9'].forEach(k=>document.getElementById('grid-d').appendChild(buildBlock(k)));
+}
+
+// =====================================================================
+// INTERACTIONS
+// =====================================================================
+function togPanel(key){
+  openP[key]=!openP[key];const on=openP[key];
+  document.getElementById('qp-'+key).className='qpanel'+(on?' open':'');
+  document.getElementById('chev-'+key).className='chev'+(on?' open':'');
+}
+
+function setQScore(key,idx,val,group){
+  qScores[key][idx]=qScores[key][idx]===val?null:val;
+  const mr=document.getElementById(`mr-${key}-${idx}`);
+  mr.querySelectorAll('.mbtn').forEach((btn,i)=>{const lbl=LBL[i];btn.className='mbtn'+(qScores[key][idx]===i?' a'+lbl:'');});
+  const cur=qScores[key][idx];
+  document.getElementById(`qlbl-${key}-${idx}`).textContent=cur!==null?`${cur} · ${NM[LBL[cur]]}`:'não pontuado';
+  if(!domOverride[key])updateDomFromQuesitos(key,group);
+  calcAll();
+}
+
+function updateDomFromQuesitos(key,group){
+  const auto=calcDomFromQ(key);
+  if(domOverride[key]){
+    // Override is active: don't change badge/buttons, but refresh alert
+    // (alert compares manual value vs new auto)
+    updateNoteBar(key,auto,true);
+  }else{
+    // No override: sync S and update everything normally
+    S[group][key]=auto;
+    updateDomBadge(key,auto);
+    updateDomButtons(key,null,false);
+    updateNoteBar(key,auto,false);
+  }
+}
+
+function setDomManual(group,key,val){
+  if(domOverride[key]&&S[group][key]===val){clearOverride(key);return;}
+  domOverride[key]=true;S[group][key]=val;
+  updateDomBadge(key,val);updateDomButtons(key,val,true);updateNoteBar(key,val,true);
+  calcAll();
+}
+
+function clearOverride(key){
+  const d=DOM[key];domOverride[key]=false;S[d.g][key]=null;
+  const auto=calcDomFromQ(key);
+  updateDomBadge(key,auto);updateDomButtons(key,null,false);updateNoteBar(key,auto,false);
+  calcAll();
+}
+
+function updateDomBadge(key,val){
+  const p=document.getElementById('prev-'+key);
+  if(!val){p.className='dprev';p.textContent='—';}
+  else{p.className='dprev b'+val;p.textContent=val;}
+}
+
+function updateDomButtons(key,activeVal,isOverride){
+  const qrow=document.getElementById('qrow-'+key);if(!qrow)return;
+  qrow.querySelectorAll('.qbtn').forEach(btn=>{const lbl=btn.textContent;btn.className='qbtn'+(isOverride&&activeVal===lbl?' a'+lbl:'');});
+}
+
+function updateNoteBar(key,autoVal,isOverride){
+  const noteTxt=document.getElementById('note-txt-'+key);
+  const ovrBtn=document.getElementById('ovr-btn-'+key);if(!noteTxt)return;
+  const dAlert=document.getElementById('div-alert-'+key);
+  const dTxt=document.getElementById('div-txt-'+key);
+
+  if(isOverride){
+    const manVal=S[DOM[key].g][key];
+    noteTxt.style.color='var(--purple)';
+    noteTxt.textContent=`Manual: ${manVal} · ${NM[manVal]}. Quesitos exibidos como referência.`;
+    ovrBtn.style.display='inline';
+    // Show divergence alert if manual value differs from auto
+    if(dAlert&&dTxt){
+      if(autoVal&&autoVal!==manVal){
+        dAlert.className='diverge-alert on';
+        dTxt.textContent=`Atenção: o qualificador definido manualmente (${manVal} · ${NM[manVal]}) difere do calculado pelos quesitos (${autoVal} · ${NM[autoVal]}). O valor manual prevalece — revise se isso é intencional.`;
+      }else{
+        dAlert.className='diverge-alert';
+      }
+    }
+  }else if(autoVal){
+    noteTxt.style.color='var(--green)';
+    const sc=Object.values(qScores[key]).filter(v=>v!==null);
+    const avg=(sc.reduce((a,b)=>a+b,0)/sc.length).toFixed(2);
+    noteTxt.textContent=`Auto: média ${avg} → ${autoVal} · ${NM[autoVal]}`;
+    ovrBtn.style.display='none';
+    if(dAlert)dAlert.className='diverge-alert';
+  }else{
+    noteTxt.style.color='var(--dim)';
+    noteTxt.textContent='Pontue os quesitos — o qualificador do domínio será calculado automaticamente pela média.';
+    ovrBtn.style.display='none';
+    if(dAlert)dAlert.className='diverge-alert';
+  }
+}
+
+function setAge(a){
+  S.age=a;
+  document.getElementById('tab-a').className='atab'+(a==='adulto'?' on':'');
+  document.getElementById('tab-m').className='atab'+(a==='menor'?' on':'');
+  calcAll();
+}
+function togImp(){S.imp=!S.imp;document.getElementById('sw-imp').className='tsw'+(S.imp?' on':'');document.getElementById('banner').className='banner'+(S.imp?' on':'');calcAll();}
+function togMajor(t){if(t==='e'){S.majE=!S.majE;document.getElementById('sw-e').className='tsw'+(S.majE?' on':'');}else{S.majP=!S.majP;document.getElementById('sw-p').className='tsw'+(S.majP?' on':'');}calcAll();}
+
+// =====================================================================
+// MAIN CALC
+// =====================================================================
+function calcAll(){
+  // getDomVal() computes live — no need to pre-sync S here
+  const re=calcFA(),rb=calcFC(),rd=calcAP();
+  upBadge('b-e',re);upBadge('b-b',rb);upBadge('b-d',rd);
+  upFrmE(re);upFrmB(rb);upFrmD(rd);
+  if(S.imp){showV('vimp','⚠️','Indeferido','Alterações resolvíveis em menos de 2 anos — art. 8º, III.',null);}
+  else{
+    const v=tabela(re,rd,rb);
+    if(v===null)showV('','⏳','Aguardando','Preencha todos os qualificadores dos três componentes.',null);
+    else if(v)showV('vd','✅','Deferido','O avaliado PREENCHE os requisitos do art. 20, §§ 2º e 10 da Lei nº 8.742/1993.',{e:re,d:rd,b:rb});
+    else showV('vi2','❌','Indeferido','O avaliado NÃO preenche os requisitos do art. 20, §§ 2º e 10 da Lei nº 8.742/1993.',{e:re,d:rd,b:rb});
+  }
+  hlTab(re,rd,rb);
+}
+
+function upBadge(id,v){const el=document.getElementById(id);if(!v){el.className='rbadge bempty';el.textContent='—';}else{el.className='rbadge b'+v;el.textContent=v;}}
+function upFrmE(r){const el=document.getElementById('frm-e');const v=['e1','e2','e3','e4','e5'].map(k=>getDomVal(k));if(v.every(x=>x)){const s=v.map(x=>NUM[x]).reduce((a,b)=>a+b,0);el.innerHTML=`FA Final: <b style="color:var(--${r})">${r} · ${NM[r]}</b> <span style="color:var(--dim)">· Soma ${s} × 5 − 0,1 = ${(s*5-0.1).toFixed(2)}</span>`;}else el.innerHTML=`FA Final: <span style="color:var(--muted)">aguardando e1–e5…</span>`;}
+function upFrmB(r){const el=document.getElementById('frm-b');const v=['b1','b2','b3','b4','b5','b6','b7','b8'].map(k=>getDomVal(k));if(v.every(x=>x)){const base=LBL[Math.max(...v.map(x=>NUM[x]))];el.innerHTML=`FC Final: <b style="color:var(--${r})">${r} · ${NM[r]}</b>${r!==base?` <span style="color:var(--dim)">(base ${base} → majorado)</span>`:''}`;}else el.innerHTML=`FC Final: <span style="color:var(--muted)">aguardando b1–b8…</span>`;}
+function upFrmD(r){const el=document.getElementById('frm-d');const v=['d1','d2','d3','d4','d5','d6','d7','d8','d9'].map(k=>getDomVal(k));if(v.every(x=>x)){const s=v.map(x=>NUM[x]).reduce((a,b)=>a+b,0);el.innerHTML=`AP Final: <b style="color:var(--${r})">${r} · ${NM[r]}</b> <span style="color:var(--dim)">· Soma ${s} × 2,7778 − 0,1 = ${(s*2.777778-0.1).toFixed(2)}</span>`;}else el.innerHTML=`AP Final: <span style="color:var(--muted)">aguardando d1–d9…</span>`;}
+function showV(cls,icon,label,sub,q){
+  const card=document.getElementById('vcard');card.className='vcard'+(cls?' '+cls:'');
+  document.getElementById('v-ic').textContent=icon;document.getElementById('v-lb').textContent=label;document.getElementById('v-sb').textContent=sub;
+  const tb=document.getElementById('v-tb');
+  if(q){tb.style.display='block';tb.innerHTML=`<div style="color:var(--muted);margin-bottom:3px;">Tabela Conclusiva:</div><b style="color:var(--${q.e})">FA ${q.e}</b> × <b style="color:var(--${q.d})">AP ${q.d}</b> × <b style="color:var(--${q.b})">FC ${q.b}</b>`;}
+  else tb.style.display='none';
+}
+
+function buildTab(){
+  const el=document.getElementById('tabvis');const L=['C','G','M','L','N'];
+  el.innerHTML=`<div style="color:var(--dim)">FC\\AP</div>`+L.map(l=>`<div style="text-align:center;color:var(--${l})">${l}</div>`).join('');
+  L.forEach(b=>{el.innerHTML+=`<div style="color:var(--${b})">${b}</div>`;L.forEach(d=>{const bn=NUM[b],dn=NUM[d];let sym,col;if(bn<=1||dn<=1){sym='✗';col='var(--red)';}else if(bn===2&&dn===2){sym='★';col='var(--yellow)';}else{sym='✓';col='var(--green)';}el.innerHTML+=`<div id="tr-${b}-${d}" style="text-align:center;color:${col}">${sym}</div>`;});});
+}
+function hlTab(e,d,b){['C','G','M','L','N'].forEach(bv=>['C','G','M','L','N'].forEach(dv=>{const el=document.getElementById(`tr-${bv}-${dv}`);if(el){el.style.outline='none';el.style.borderRadius='';}}));if(b&&d){const el=document.getElementById(`tr-${b}-${d}`);if(el){el.style.outline='2px solid var(--accent)';el.style.borderRadius='3px';}}}
+
+// =====================================================================
+// PDF TEXT PARSER
+// =====================================================================
+function togPdfPanel(){
+  const panel=document.getElementById('pdf-panel');
+  const btn=document.getElementById('pdf-toggle-btn');
+  const open=panel.style.display==='none';
+  panel.style.display=open?'block':'none';
+  btn.textContent=open?'▴ Fechar':'▾ Abrir';
+}
+
+function parsePDFText(){
+  const raw=document.getElementById('pdf-text').value.trim();
+  if(!raw){showPDFStatus('err','Cole o texto do PDF antes de analisar.');return;}
+
+  showPDFStatus('loading','<span class="spin" style="display:inline-block;animation:spin 1s linear infinite;">⟳</span> Analisando texto…');
+  animBar();
+
+  // Run parser after brief timeout to allow UI to update
+  setTimeout(()=>{
+    try{
+      const result=extractFromText(raw);
+      if(!result.found){
+        showPDFStatus('err','Não foi possível identificar dados da avaliação biopsicossocial no texto colado. Verifique se o PDF é digital (não escaneado) e tente novamente.');
+        stopBar();return;
+      }
+      applyPDFData(result);
+      const msgs=[];
+      if(result._qCount>0)msgs.push(`${result._qCount} quesito(s) pontuado(s)`);
+      if(result._domCount>0)msgs.push(`${result._domCount} qualificador(es) de domínio`);
+      showPDFStatus('ok',`✓ Preenchimento concluído — ${msgs.join(', ')}.`);
+      stopBar(true);
+    }catch(err){
+      console.error(err);
+      showPDFStatus('err','Erro ao analisar o texto: '+err.message);
+      stopBar();
+    }
+  },80);
+}
+
+// =====================================================================
+// PARSER ENGINE — Portaria 2/2015 Espécie B87
+// Primary strategy: parse the numeric summary tables that INSS PDFs
+// always render at the bottom of each section.
+// Secondary strategy: detect score patterns in quesito lines.
+// =====================================================================
+function extractFromText(raw){
+  const txt=raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  const low=txt.toLowerCase();
+
+  const result={
+    quesitos:{},domOverride:{},
+    impedimento_menos_2anos:false,
+    estrutura_maior_funcao:false,
+    prognostico_desfavoravel:false,
+    found:false,_qCount:0,_domCount:0
+  };
+
+  const isBPC=low.includes('bpc')||low.includes('prestação continuada')||
+    low.includes('espécie 87')||low.includes('especie 87')||
+    low.includes('avaliação médico-pericial')||low.includes('avaliação social')||
+    low.includes('perícia médica federal')||low.includes('pericia medica federal')||
+    low.includes('qualificador');
+  if(!isBPC)return result;
+  result.found=true;
+
+  const LBL_LOCAL=['N','L','M','G','C'];
+  const WORD_MAP={
+    'nenhuma':0,'nenhum':0,'nenhuma alteração':0,'nenhuma dificuldade':0,
+    'leve':1,'alteração leve':1,'dificuldade leve':1,
+    'moderada':2,'moderado':2,'alteração moderada':2,'dificuldade moderada':2,
+    'grave':3,'alteração grave':3,'dificuldade grave':3,
+    'completa':4,'completo':4,'alteração completa':4,'dificuldade completa':4
+  };
+
+  // ================================================================
+  // STRATEGY A: Parse numeric summary tables
+  // These appear in two formats in INSS PDFs:
+  //
+  // Format 1 — domain-by-subdomain row then grouped row:
+  //   "X - b1  XI - b2  XII - b2  ..."
+  //   "0  1  0  0  0  ..."           ← per-subdomain scores
+  //   "b1  b2  b3  b4  ..."
+  //   "0  1  0  0  ..."              ← per-domain scores
+  //
+  // Format 2 — d1..d5 row:
+  //   "XXVI - d1  XXVII - d2  ..."
+  //   "1  0  0  0  0"
+  //   "d1  d2  d3  d4  d5"
+  //   "1  0  0  0  0"
+  // ================================================================
+  const lines=txt.split('\n');
+
+  // Find the key summary lines
+  for(let i=0;i<lines.length;i++){
+    const line=lines[i].trim();
+    const llow=line.toLowerCase();
+
+    // ---- B domains summary ----
+    // Line like: "b1 b2 b3 b4 b5 b6 b7 b8"
+    if(/^\s*b1\s+b2\s+b3\s+b4\s+b5\s+b6\s+b7\s+b8\s*$/i.test(line)){
+      // Next line should be the scores
+      const scoreLine=(lines[i+1]||'').trim();
+      const scores=scoreLine.split(/\s+/).map(Number).filter(v=>!isNaN(v)&&v>=0&&v<=4);
+      if(scores.length===8){
+        const bKeys=['b1','b2','b3','b4','b5','b6','b7','b8'];
+        bKeys.forEach((dk,si)=>{
+          const v=scores[si];
+          if(!result.domOverride[dk]){
+            result.domOverride[dk]=LBL_LOCAL[v];
+            result._domCount++;
+          }
+        });
+      }
+    }
+
+    // ---- D1-D5 summary (médico) ----
+    // Line like: "d1 d2 d3 d4 d5"
+    if(/^\s*d1\s+d2\s+d3\s+d4\s+d5\s*$/i.test(line)){
+      const scoreLine=(lines[i+1]||'').trim();
+      const scores=scoreLine.split(/\s+/).map(Number).filter(v=>!isNaN(v)&&v>=0&&v<=4);
+      if(scores.length===5){
+        ['d1','d2','d3','d4','d5'].forEach((dk,si)=>{
+          if(!result.domOverride[dk]){
+            result.domOverride[dk]=LBL_LOCAL[scores[si]];
+            result._domCount++;
+          }
+        });
+      }
+    }
+
+    // ---- D6-D9 summary (social) ----
+    // Line like: "d6 d7 d8 d9"
+    if(/^\s*d6\s+d7\s+d8\s+d9\s*$/i.test(line)){
+      const scoreLine=(lines[i+1]||'').trim();
+      const scores=scoreLine.split(/\s+/).map(Number).filter(v=>!isNaN(v)&&v>=0&&v<=4);
+      if(scores.length===4){
+        ['d6','d7','d8','d9'].forEach((dk,si)=>{
+          if(!result.domOverride[dk]){
+            result.domOverride[dk]=LBL_LOCAL[scores[si]];
+            result._domCount++;
+          }
+        });
+      }
+    }
+
+    // ---- E domains summary (social) ----
+    // Line like: "e1 e2 e3 e4 e5"
+    if(/^\s*e1\s+e2\s+e3\s+e4\s+e5\s*$/i.test(line)){
+      const scoreLine=(lines[i+1]||'').trim();
+      const scores=scoreLine.split(/\s+/).map(Number).filter(v=>!isNaN(v)&&v>=0&&v<=4);
+      if(scores.length===5){
+        ['e1','e2','e3','e4','e5'].forEach((dk,si)=>{
+          if(!result.domOverride[dk]){
+            result.domOverride[dk]=LBL_LOCAL[scores[si]];
+            result._domCount++;
+          }
+        });
+      }
+    }
+
+    // ---- D1-D9 combined summary (some forms) ----
+    if(/^\s*d1\s+d2\s+d3\s+d4\s+d5\s+d6\s+d7\s+d8\s+d9\s*$/i.test(line)){
+      const scoreLine=(lines[i+1]||'').trim();
+      const scores=scoreLine.split(/\s+/).map(Number).filter(v=>!isNaN(v)&&v>=0&&v<=4);
+      if(scores.length===9){
+        ['d1','d2','d3','d4','d5','d6','d7','d8','d9'].forEach((dk,si)=>{
+          if(!result.domOverride[dk]){
+            result.domOverride[dk]=LBL_LOCAL[scores[si]];
+            result._domCount++;
+          }
+        });
+      }
+    }
+
+    // ---- Inline "Qualificador do domínio XX - bN  LETRA" ----
+    // e.g. "Qualificador de domínio X - b1 X" where position of X
+    // maps to column under "0 1 2 3 4"
+    // Unfortunately column position is lost in plain text copy.
+    // BUT: "Qualificador FUNÇÕES DO CORPO\nL - Alteração Leve" is parseable
+    if(llow.includes('qualificador funções do corpo')||llow.includes('qualificador atividades')){
+      const nextLine=(lines[i+1]||'').trim().toLowerCase();
+      // Pattern: "L - Alteração Leve" or "N - Nenhuma Dificuldade"
+      const wm=nextLine.match(/^([nlmgc])\s*[-–]\s*(nenhuma|leve|moderada|grave|completa)/i);
+      if(wm){
+        // This is the OVERALL final qualifier — we store it as info
+        // (individual domains already parsed from table)
+      }
+    }
+
+    // ---- "Resultado Final" section ----
+    // "Atividades e Participação: N - Nenhuma Dificuldade"
+    // "Funções do Corpo: L - Alteração Leve"
+    const resAP=llow.match(/atividades e participa[çc][ãa]o:\s*([nlmgc])\s*[-–]/i)||
+                llow.match(/qualificador.*atividades.*[:\s]+([nlmgc])\s*[-–]/i);
+    if(resAP){
+      // overall AP — only use if we have no individual d1-d9 data yet
+      // (don't override granular data)
+    }
+
+    // ---- Individual "Qualificador de domínio" lines with numeric score ----
+    // Some exports show: "Qualificador de domínio XI - b2  2" (number at end)
+    const domLineMatch=line.match(/qualificador\s+de\s+dom[íi]nio\s+(?:[IVXLC]+\s*[-–]\s*)?(e[1-5]|b[1-8]|d[1-9])\s+(\d)$/i);
+    if(domLineMatch){
+      const dk=domLineMatch[1].toLowerCase();
+      const v=parseInt(domLineMatch[2]);
+      if(v>=0&&v<=4&&DOM[dk]&&!result.domOverride[dk]){
+        result.domOverride[dk]=LBL_LOCAL[v];
+        result._domCount++;
+      }
+    }
+  }
+
+  // ================================================================
+  // STRATEGY B: Scan for quesito lines with a trailing digit 0-4
+  // Pattern: "49. Some text... - b110  2" (digit at very end)
+  // This works when PDF exports scores as digits, not "X"
+  // ================================================================
+  const Q_MAP={};
+  Object.keys(DOM).forEach(dk=>{
+    DOM[dk].q.forEach((q,i)=>{Q_MAP[q.n]={dk,i};});
+  });
+
+  lines.forEach(line=>{
+    const m=line.match(/^(\d{1,3})\.\s+.+[-–]\s*[a-z]\d{3}(?:\s*\/\s*[a-z]\d{3})*\s+([0-4])\s*$/i);
+    if(m){
+      const n=parseInt(m[1]);const sc=parseInt(m[2]);
+      if(Q_MAP[n]){
+        const {dk,i}=Q_MAP[n];
+        if(!result.quesitos[dk])result.quesitos[dk]={};
+        if(result.quesitos[dk][i]===undefined){
+          result.quesitos[dk][i]=sc;result._qCount++;
+        }
+      }
+    }
+  });
+
+  // ================================================================
+  // STRATEGY C: Parse "X - b1 XI - b2 ..." header + score row
+  // The INSS PDF summary table has domain headers then numeric scores
+  // "X - b1  XI - b2  XII - b2  XIII - b2  XIV - b3  ..."
+  // "0  1  0  0  0  0  0  0  0  0  0  0  0  0"
+  // This maps to sub-domains, not the grouped b1..b8
+  // ================================================================
+  for(let i=0;i<lines.length;i++){
+    const line=lines[i].trim();
+    // Detect the sub-domain header row
+    if(/x\s*-\s*b1.*xi\s*-\s*b2/i.test(line)){
+      // Count how many domain references appear
+      const domRefs=line.match(/(?:[IVXLC]+\s*-\s*[bed]\d)/gi)||[];
+      const scoreLine=(lines[i+1]||'').trim();
+      const scores=scoreLine.split(/\s+/).map(Number).filter(v=>!isNaN(v)&&v>=0&&v<=4);
+      // Sub-domain order: b1(X),b2(XI=vis),b2(XII=aud),b2(XIII=dor),b3,b4(card),b4(hemat),b4(imun),b4(resp),b5(dig),b5(meta),b6,b7,b8
+      // We only care about the grouped b1..b8 (already parsed from table B)
+      // But if not found yet, derive from sub-scores
+      if(scores.length>=14&&result._domCount===0){
+        // Map sub-domain scores to groups
+        const subMap=[
+          {dk:'b1',s:scores[0]},
+          {dk:'b2',s:Math.max(scores[1],scores[2],scores[3])},
+          {dk:'b3',s:scores[4]},
+          {dk:'b4',s:Math.max(scores[5],scores[6],scores[7],scores[8])},
+          {dk:'b5',s:Math.max(scores[9],scores[10])},
+          {dk:'b6',s:scores[11]},
+          {dk:'b7',s:scores[12]},
+          {dk:'b8',s:scores[13]},
+        ];
+        subMap.forEach(({dk,s})=>{
+          if(!result.domOverride[dk]){
+            result.domOverride[dk]=LBL_LOCAL[s];
+            result._domCount++;
+          }
+        });
+      }
+    }
+
+    // Detect d1-d5 sub header: "XXVI - d1  XXVII - d2  ..."
+    if(/xxvi\s*-\s*d1.*xxvii\s*-\s*d2/i.test(line)){
+      const scoreLine=(lines[i+1]||'').trim();
+      const scores=scoreLine.split(/\s+/).map(Number).filter(v=>!isNaN(v)&&v>=0&&v<=4);
+      if(scores.length>=5){
+        ['d1','d2','d3','d4','d5'].forEach((dk,si)=>{
+          if(!result.domOverride[dk]){
+            result.domOverride[dk]=LBL_LOCAL[scores[si]];
+            result._domCount++;
+          }
+        });
+      }
+    }
+  }
+
+  // ================================================================
+  // STRATEGY D: Word-based qualifiers in domain lines
+  // "Qualificador de domínio XI - b2 X" → look for surrounding context
+  // "L - Alteração Leve" on next non-blank line after domain label
+  // ================================================================
+  for(let i=0;i<lines.length;i++){
+    const line=lines[i];const llow=line.toLowerCase();
+
+    // Match: "Qualificador de domínio XX - b2" then look ahead for word qualifier
+    const dm=llow.match(/qualificador\s+de\s+dom[íi]nio\s+(?:[ivxlc]+\s*[-–]\s*)?(e[1-5]|b[1-8]|d[1-9])/i);
+    if(dm){
+      const dk=dm[1].toLowerCase();
+      if(result.domOverride[dk])continue;// already set
+      // Look ahead up to 3 lines for word qualifier
+      for(let j=i+1;j<=Math.min(i+3,lines.length-1);j++){
+        const jl=lines[j].toLowerCase().trim();
+        let found=null;
+        for(const[word,val]of Object.entries(WORD_MAP)){
+          if(jl.includes(word)){found=val;break;}
+        }
+        if(found!==null){
+          result.domOverride[dk]=LBL_LOCAL[found];
+          result._domCount++;
+          break;
+        }
+      }
+    }
+
+    // ---- FLAGS ----
+    if(llow.includes('impedimento de longo prazo')||llow.includes('efeitos pelo prazo mínimo')){
+      // Check if "Sim" is on same or next line
+      const ctx=(line+(lines[i+1]||'')).toLowerCase();
+      if(/\bsim\b/.test(ctx)||/\bx\s*sim\b/.test(ctx))
+        result.impedimento_menos_2anos=true;
+    }
+    if(llow.includes('estrutura do corpo')&&llow.includes('maiores limitações')){
+      const ctx=(line+(lines[i+1]||'')).toLowerCase();
+      if(/\bsim\b/.test(ctx))result.estrutura_maior_funcao=true;
+    }
+    if(llow.includes('prognóstico desfavorável')||llow.includes('prognostico desfavoravel')){
+      const ctx=(line+(lines[i+1]||'')).toLowerCase();
+      if(/\bsim\b/.test(ctx))result.prognostico_desfavoravel=true;
+    }
+    // "Duração" / "impedimento de longo prazo? X Sim"
+    if(/\bx\s*sim\b/i.test(line)&&(llow.includes('longo prazo')||llow.includes('dois anos'))){
+      result.impedimento_menos_2anos=true;
+    }
+  }
+
+  return result;
+}
+
+function applyPDFData(data){
+  // Apply individual quesito scores (when available)
+  if(data.quesitos){
+    Object.entries(data.quesitos).forEach(([domKey,scores])=>{
+      if(!DOM[domKey])return;
+      Object.entries(scores).forEach(([idx,val])=>{
+        const i=parseInt(idx);
+        if(isNaN(i)||val===null||val===undefined)return;
+        const v=Math.min(4,Math.max(0,parseInt(val)));
+        qScores[domKey][i]=v;
+        const item=document.getElementById(`qi-${domKey}-${i}`);
+        if(item)item.classList.add('ai-hi');
+      });
+      refreshDomQuesitosUI(domKey);
+      if(!domOverride[domKey]){
+        const d=DOM[domKey];
+        const auto=calcDomFromQ(domKey);
+        S[d.g][domKey]=auto;
+        updateDomBadge(domKey,auto);
+        updateDomButtons(domKey,null,false);
+        updateNoteBar(domKey,auto,false);
+        const blk=document.getElementById('blk-'+domKey);
+        if(blk&&auto)blk.classList.add('ai-hi');
+      }
+    });
+  }
+
+  // Apply domain-level overrides from PDF summary tables
+  // Also fill quesitos with that score so they show the imported value
+  if(data.domOverride){
+    Object.entries(data.domOverride).forEach(([domKey,val])=>{
+      if(!DOM[domKey]||!LBL.includes(val))return;
+      const d=DOM[domKey];
+      const numVal=NUM[val];
+
+      // Fill all quesitos of this domain with the domain score
+      // (best approximation when individual quesito data is unavailable)
+      DOM[domKey].q.forEach((_,i)=>{
+        if(qScores[domKey][i]===null){
+          qScores[domKey][i]=numVal;
+          const item=document.getElementById(`qi-${domKey}-${i}`);
+          if(item)item.classList.add('ai-hi');
+        }
+      });
+      refreshDomQuesitosUI(domKey);
+
+      // Set override so domain badge shows the exact PDF value
+      domOverride[domKey]=true;
+      S[d.g][domKey]=val;
+      updateDomBadge(domKey,val);
+      updateDomButtons(domKey,val,true);
+      // Pass auto value so divergence alert works correctly
+      const autoAfterFill=calcDomFromQ(domKey);
+      updateNoteBar(domKey,autoAfterFill,true);
+      const blk=document.getElementById('blk-'+domKey);
+      if(blk)blk.classList.add('ai-hi');
+    });
+  }
+
+  // Apply flags
+  if(data.impedimento_menos_2anos&&!S.imp)togImp();
+  if(data.estrutura_maior_funcao&&!S.majE)togMajor('e');
+  if(data.prognostico_desfavoravel&&!S.majP)togMajor('p');
+
+  calcAll();
+}
+
+// Refresh all mini-buttons and score labels for a domain from qScores
+function refreshDomQuesitosUI(domKey){
+  DOM[domKey].q.forEach((_,i)=>{
+    const cur=qScores[domKey][i];
+    const mr=document.getElementById(`mr-${domKey}-${i}`);
+    if(mr)mr.querySelectorAll('.mbtn').forEach((btn,vi)=>{
+      btn.className='mbtn'+(cur===vi?' a'+LBL[vi]:'');
+    });
+    const qlbl=document.getElementById(`qlbl-${domKey}-${i}`);
+    if(qlbl)qlbl.textContent=cur!==null?`${cur} · ${NM[LBL[cur]]}`:'não pontuado';
+  });
+}
+
+function showPDFStatus(type,msg){
+  const el=document.getElementById('pdf-status');
+  el.className=`pdf-status ${type}`;
+  el.innerHTML=msg;
+}
+function animBar(){
+  const bar=document.getElementById('pdf-bar');
+  const fill=document.getElementById('pdf-bar-fill');
+  bar.className='pdf-bar on';fill.style.width='0%';
+  let w=0;const iv=setInterval(()=>{w=Math.min(w+Math.random()*8,88);fill.style.width=w+'%';if(w>=88)clearInterval(iv);},300);
+  animBar._iv=iv;
+}
+function stopBar(success=false){
+  clearInterval(animBar._iv);
+  const fill=document.getElementById('pdf-bar-fill');
+  if(success){fill.style.width='100%';setTimeout(()=>{document.getElementById('pdf-bar').className='pdf-bar';},800);}
+  else{document.getElementById('pdf-bar').className='pdf-bar';}
+}
+
+// =====================================================================
+// MINUTA
+// =====================================================================
+function gerarMinuta(){
+  const re=calcFA(),rb=calcFC(),rd=calcAP();const v=tabela(re,rd,rb);
+  const ph=document.getElementById('minta-ph'),area=document.getElementById('minta'),btn=document.getElementById('btn-cp');
+  if(!re||!rb||!rd){ph.style.display='block';ph.textContent='Preencha todos os qualificadores antes de gerar a minuta.';ph.style.color='var(--orange)';area.className='minta';btn.style.display='none';return;}
+  const verd=S.imp?'INDEFERIDO (art. 8º, III)':v?'DEFERIDO':'INDEFERIDO';
+  const corpo=S.imp?`As alterações em Funções e/ou Estruturas do Corpo são potencialmente resolvíveis em menos de 2 (dois) anos, configurando hipótese de indeferimento nos termos do art. 8º, III, da Portaria Conjunta MDS/INSS nº 2/2015, independentemente dos demais qualificadores apurados.`:v?`A parte autora PREENCHE os requisitos estabelecidos pelo art. 20, §§ 2º e 10, da Lei nº 8.742/1993 (LOAS), que define pessoa com deficiência para fins de acesso ao Benefício de Prestação Continuada da Assistência Social – BPC, conforme combinação de qualificadores apurada na avaliação biopsicossocial: Fatores Ambientais ${re} (${NM[re]}), Atividades e Participação ${rd} (${NM[rd]}) e Funções do Corpo ${rb} (${NM[rb]}), nos termos da Portaria Conjunta MDS/INSS nº 2/2015, Anexo IV – Tabela Conclusiva de Qualificadores.`:`A parte autora NÃO preenche os requisitos estabelecidos pelo art. 20, §§ 2º e 10, da Lei nº 8.742/1993 (LOAS) para acesso ao BPC. A combinação de qualificadores apurada — Fatores Ambientais ${re} (${NM[re]}), Atividades e Participação ${rd} (${NM[rd]}) e Funções do Corpo ${rb} (${NM[rb]}) — não alcança o limiar de deferimento previsto na Tabela Conclusiva (Anexo IV) da Portaria Conjunta MDS/INSS nº 2/2015.`;
+  const txt=`AVALIAÇÃO BIOPSICOSSOCIAL — BPC/LOAS\nPortaria Conjunta MDS/INSS nº 2/2015 (Anexo IV)\nFaixa etária: ${S.age==='adulto'?'16 anos ou mais':'menor de 16 anos'}\n\nQUALIFICADORES FINAIS:\n• Fatores Ambientais (e1–e5): ${re} — ${NM[re]}\n• Atividades e Participação (d1–d9): ${rd} — ${NM[rd]}\n• Funções do Corpo (b1–b8): ${rb} — ${NM[rb]}${(S.majE||S.majP)?'\n  (qualificador majorado — art. 7º da Portaria 2/2015)':''}${S.imp?'\n⚠ IMPEDIMENTO: Alterações potencialmente resolvíveis em menos de 2 anos (art. 8º, III)':''}\n\nRESULTADO: ${verd}\n\n${corpo}`;
+  area.textContent=txt;area.className='minta on';ph.style.display='none';btn.style.display='inline-flex';
+}
+function copiarMinuta(){const txt=document.getElementById('minta').textContent;if(!txt)return;navigator.clipboard.writeText(txt).then(()=>{const b=document.getElementById('btn-cp');b.textContent='✓ Copiado!';setTimeout(()=>b.textContent='Copiar ↗',2000);});}
+
+// =====================================================================
+// RESET
+// =====================================================================
+function resetAll(){
+  S={age:'adulto',imp:false,majE:false,majP:false,e:{e1:null,e2:null,e3:null,e4:null,e5:null},b:{b1:null,b2:null,b3:null,b4:null,b5:null,b6:null,b7:null,b8:null},d:{d1:null,d2:null,d3:null,d4:null,d5:null,d6:null,d7:null,d8:null,d9:null}};
+  Object.keys(DOM).forEach(k=>{qScores[k]={};DOM[k].q.forEach((_,i)=>qScores[k][i]=null);});
+  domOverride={};openP={};
+  ['sw-imp','sw-e','sw-p'].forEach(id=>document.getElementById(id).className='tsw');
+  document.getElementById('banner').className='banner';
+  document.getElementById('tab-a').className='atab on';
+  document.getElementById('tab-m').className='atab';
+  document.getElementById('minta').className='minta';document.getElementById('minta').textContent='';
+  document.getElementById('minta-ph').style.display='block';document.getElementById('minta-ph').textContent='Preencha os qualificadores e clique em "Gerar texto" para obter a minuta automática.';document.getElementById('minta-ph').style.color='';
+  document.getElementById('btn-cp').style.display='none';
+  document.getElementById('pdf-status').className='pdf-status';
+  document.getElementById('pdf-status').innerHTML='';
+  const ta=document.getElementById('pdf-text');if(ta)ta.value='';
+  ['grid-e','grid-b','grid-d'].forEach(id=>document.getElementById(id).innerHTML='');
+  renderGrids();calcAll();
+}
+
+renderGrids();buildTab();calcAll();
+</script>
+</body>
+</html>
